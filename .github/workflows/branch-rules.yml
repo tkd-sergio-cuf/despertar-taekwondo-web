@@ -1,0 +1,57 @@
+name: Branch rules
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  branch-rules:
+    name: Validar rama y flujo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar nombre de rama y destino
+        env:
+          HEAD: ${{ github.head_ref }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          FLOW="Flujo correcto:
+            feature/*, fix/*, chore/*, docs/*  -> develop  (creadas desde develop)
+            develop                            -> staging
+            staging                            -> main
+            hotfix/*                           -> main, y luego back-merge a develop  (creada desde main)"
+
+          fail() {
+            echo "::error::$1"
+            echo
+            echo "PR: '$HEAD' -> '$BASE'"
+            echo "$1"
+            echo
+            echo "$FLOW"
+            exit 1
+          }
+
+          if [[ ! "$HEAD" =~ ^(feature|fix|chore|docs|hotfix)/.+$ && "$HEAD" != "develop" && "$HEAD" != "staging" ]]; then
+            fail "Nombre de rama inválido: '$HEAD'. Usa feature/*, fix/*, chore/*, docs/* o hotfix/* (develop y staging solo para promociones)."
+          fi
+
+          case "$BASE" in
+            develop)
+              [[ "$HEAD" =~ ^(feature|fix|chore|docs|hotfix)/ ]] \
+                || fail "A develop solo entran feature/*, fix/*, chore/*, docs/* y hotfix/* (back-merge). '$HEAD' no puede entrar a develop."
+              ;;
+            staging)
+              [[ "$HEAD" == "develop" ]] \
+                || fail "A staging solo entra develop. '$HEAD' debe ir primero a develop."
+              ;;
+            main)
+              [[ "$HEAD" == "staging" || "$HEAD" =~ ^hotfix/ ]] \
+                || fail "A main solo entran staging o hotfix/*. '$HEAD' debe promoverse por develop -> staging -> main."
+              ;;
+            *)
+              fail "Los PRs solo pueden apuntar a develop, staging o main. '$BASE' no es un destino válido."
+              ;;
+          esac
+
+          echo "OK: '$HEAD' -> '$BASE' cumple el flujo."
