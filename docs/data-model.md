@@ -9,7 +9,13 @@ El sitio es una plantilla vendible. Todo lo que cambia de un cliente a otro va e
 - **(a) Dato del negocio → base de datos:** sedes, horarios, programas, instructores, testimonios, FAQ, contacto, redes, textos principales (titular, subtítulos de sección, historia), cifras destacadas, colores de las categorías de clase y **todas las imágenes**.
 - **(b) Texto genérico de interfaz → código:** etiquetas de botones, formularios y navegación (ver sección 6).
 
-Convenciones de todas las tablas: `id uuid` PK, `created_at timestamptz`. `sort_order int` donde el orden importa. `is_published boolean` donde el cliente quiera ocultar filas sin borrarlas.
+Convenciones de las tablas:
+
+- Todas: `id uuid` PK y `created_at timestamptz`.
+- Todas las tablas de contenido (todas excepto `free_class_requests`): `updated_at timestamptz`, que se actualiza en cada modificación de la fila. Por brevedad no se repite en cada tabla de la sección 3.
+- `sort_order int` donde el orden importa.
+- `is_published boolean` (por defecto `true`) en las tablas donde el cliente quiera ocultar una fila sin borrarla: `locations`, `programs`, `instructors`, `stats`, `class_types`, `location_images`, `testimonials` y `faqs`. Una fila no publicada no se muestra en el sitio, pero conserva sus datos y relaciones.
+- Las restricciones a nivel de base de datos están en la sección 4.
 
 ## 2. Imágenes (Supabase Storage)
 
@@ -45,7 +51,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 
 ### 3.1 Identidad y contenido general
 
-**`site_settings`** — una sola fila. Alimenta header, footer, botón "Clase gratis" y metadatos.
+**`site_settings`** — una sola fila, garantizada por la base de datos (ver sección 4). Alimenta header, footer, botón "Clase gratis" y metadatos.
 
 | Columna | Tipo | Nota |
 |---|---|---|
@@ -63,7 +69,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | phone | text, null | "Tel." del footer |
 | email | text, null | correo del footer |
 
-**`hero`** — una sola fila. Sección de inicio.
+**`hero`** — una sola fila, garantizada por la base de datos (ver sección 4). Sección de inicio.
 
 | Columna | Tipo | Nota |
 |---|---|---|
@@ -83,6 +89,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | value | text | "2", "5", "$0" |
 | label | text | "sedes", "años", "clases", "prueba" |
 | description | text | "Salitre y Modelia", "Edad mínima para empezar"… |
+| is_published | boolean | |
 | sort_order | int | |
 
 **`section_content`** — títulos y textos de cada sección. Una fila por sección.
@@ -123,6 +130,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | name | text | "Combate (Kyorugi)" |
 | description | text | |
 | highlights | text[] | los 3 puntos ("Táctica", "Reacción", "Resistencia") |
+| is_published | boolean | |
 
 **`programs`** — tarjetas de la sección "Clases" del inicio (5 en el diseño: niños, jóvenes y adultos, adulto mayor, todos los niveles, personalizadas).
 
@@ -135,6 +143,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | group_id | uuid FK → class_groups, null | define el color del punto; null si no pertenece a un grupo (privadas, mixta) |
 | color | text, null | color propio cuando no hay grupo |
 | image_path, image_alt | text, null | |
+| is_published | boolean | |
 | sort_order | int | |
 
 **`schedule_slots`** — una fila por clase en la semana de una sede. Alimenta la grilla de Horarios y la lista "Horarios · {sede}" del inicio (esta se obtiene agrupando franjas; no se guarda aparte).
@@ -165,6 +174,7 @@ Los horarios del inicio ("Lunes a viernes", "Sábado y domingo") salen de agrupa
 | maps_url | text | enlace "Cómo llegar" |
 | map_embed_url | text, null | mapa integrado |
 | main_image_path, main_image_alt | text | |
+| is_published | boolean | una sede no publicada se oculta del sitio, y también sus horarios y miniaturas |
 | sort_order | int | |
 
 **`location_images`** — miniaturas de cada sede.
@@ -173,6 +183,7 @@ Los horarios del inicio ("Lunes a viernes", "Sábado y domingo") salen de agrupa
 |---|---|---|
 | location_id | uuid FK → locations | |
 | path, alt | text | |
+| is_published | boolean | |
 | sort_order | int | |
 
 ### 3.4 Personas y opiniones
@@ -185,6 +196,7 @@ Los horarios del inicio ("Lunes a viernes", "Sábado y domingo") salen de agrupa
 | rank | text | grado, p. ej. "3er Dan" |
 | bio | text | trayectoria, logros, certificaciones |
 | photo_path, photo_alt | text | |
+| is_published | boolean | |
 | sort_order | int | |
 
 **`testimonials`**
@@ -230,7 +242,9 @@ Los horarios del inicio ("Lunes a viernes", "Sábado y domingo") salen de agrupa
 
 Las opciones de "¿Para quién es la clase?" son fijas y viven en el código como valores del campo `audience`; las de sede y clase salen de `locations` y `class_groups`/`programs`.
 
-## 4. Relaciones
+## 4. Relaciones y restricciones
+
+### Relaciones
 
 ```
 class_groups 1 ── N class_types ── N schedule_slots N ── 1 locations
@@ -239,6 +253,19 @@ class_groups 1 ── N free_class_requests N ── 1 locations
 ```
 
 Tablas sin relaciones (contenido suelto): `site_settings`, `hero`, `stats`, `section_content`, `values_principles`, `instructors`, `testimonials`, `faqs`, `social_links`.
+
+### Restricciones a nivel de base de datos
+
+Se definen en la base (no solo en el código) para que ningún dato inválido entre, venga de donde venga.
+
+| Tabla | Restricción | Regla |
+|---|---|---|
+| `site_settings` | Fila única | Solo puede existir una fila. Se logra con una columna `singleton boolean` (por defecto `true`) con CHECK que exige `true` y restricción UNIQUE: una segunda fila viola la unicidad. |
+| `hero` | Fila única | Igual que `site_settings`. |
+| `schedule_slots` | CHECK | `weekday` entre 1 y 7. |
+| `schedule_slots` | CHECK | `end_time > start_time`. |
+| `testimonials` | CHECK | `rating` entre 1 y 5. |
+| `free_class_requests` | CHECK | `status` solo `new`, `contacted` o `done` (por defecto `new`). |
 
 ## 5. Qué sección del diseño alimenta cada tabla
 
