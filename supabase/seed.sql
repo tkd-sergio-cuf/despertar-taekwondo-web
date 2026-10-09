@@ -185,10 +185,17 @@ from (values
 join public.locations l on l.slug = v.location_slug
 join public.class_types c on c.slug = v.class_type_slug;
 
-insert into public.instructors (name, rank, bio, photo_path, photo_alt, sort_order) values
-  ('[NOMBRE DEL INSTRUCTOR]', '[GRADO] Dan',
-    '[TRAYECTORIA: años enseñando, logros, certificaciones y estilo de enseñanza.]',
-    'instructors/persona sin fondo.png', 'Foto del instructor', 1);
+-- No instructor photos yet: an empty path shows the neutral placeholder.
+insert into public.instructors (name, role, rank, bio, photo_path, photo_alt, sort_order) values
+  ('Milton Muñoz', 'Fundador, instructor y CEO', '5.º Dan · Kukkiwon',
+    'Fundó la academia y enseña Taekwondo desde hace más de 25 años. Es psicólogo y ha acompañado a personas de contextos muy distintos. Ve el Taekwondo como una disciplina con un enorme potencial psicológico: cada clase funciona casi como una terapia, algo especialmente valioso para los niños. Sus clases son tradicionales, fieles a las raíces del Taekwondo.',
+    '', 'Milton Muñoz, fundador e instructor', 1),
+  ('Sergio Cufiño', 'Instructor y CFO', '1.er Dan · Kukkiwon',
+    'Enseña desde los 16 años y es ingeniero electrónico. Como el fundador, ve en el Taekwondo un componente psicológico muy fuerte: su exigencia lleva a cada persona a superarse en todo sentido. Sus clases se caracterizan por ser muy intensas en lo físico.',
+    '', 'Sergio Cufiño, instructor', 2),
+  ('Alejandro León', 'Instructor', '1.er Dan · Academia Taekwondo Club Despertar',
+    'Da clases desde hace un año y está próximo a graduarse como abogado. En sus clases pone el énfasis en la técnica y en el respeto dentro del Taekwondo.',
+    '', 'Alejandro León, instructor', 3);
 
 insert into public.testimonials (quote, author_name, author_meta, rating, source, sort_order) values
   ('Mi hijo llegaba tímido y hoy saluda a todos con confianza. Los profes tienen muchísima paciencia con los pequeños.',

@@ -113,14 +113,14 @@ isOneToOne: false
                   ]
                 },"instructors": {
                   Row: {
-                    "bio": string,"created_at": string,"id": string,"is_published": boolean,"name": string,"photo_alt": string,"photo_path": string,"rank": string,"sort_order": number,"updated_at": string
+                    "bio": string,"created_at": string,"id": string,"is_published": boolean,"name": string,"photo_alt": string,"photo_path": string,"rank": string,"role": string | null,"sort_order": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "bio": string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"name": string,"photo_alt": string,"photo_path": string,"rank": string,"sort_order"?: number,"updated_at"?: string
+                    "bio": string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"name": string,"photo_alt": string,"photo_path": string,"rank": string,"role"?: string | null,"sort_order"?: number,"updated_at"?: string
                   }
                   Update: {
-                    "bio"?: string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"name"?: string,"photo_alt"?: string,"photo_path"?: string,"rank"?: string,"sort_order"?: number,"updated_at"?: string
+                    "bio"?: string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"name"?: string,"photo_alt"?: string,"photo_path"?: string,"rank"?: string,"role"?: string | null,"sort_order"?: number,"updated_at"?: string
                   }
                   Relationships: [
                     

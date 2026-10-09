@@ -2,6 +2,7 @@ import type { Tables } from "@/lib/data";
 import { Glyph } from "@/components/ui/Glyph";
 import { Section } from "@/components/ui/Section";
 import { StorageImage } from "@/components/ui/StorageImage";
+import { InstructorCarousel } from "./InstructorCarousel";
 
 type Props = {
   section: Tables<"section_content"> | undefined;
@@ -77,43 +78,41 @@ export function About({ section, principles, instructors }: Props) {
       )}
 
       {instructors.length > 0 && (
-        <div className="flex flex-col gap-4 pt-4 lg:pt-0">
-          <p className="eyebrow text-ochre">
-            {instructors.length > 1 ? "Instructores" : "Instructor"}
-          </p>
-          {instructors.map((instructor) => (
-            <article
-              key={instructor.id}
-              className="flex flex-col overflow-hidden rounded-[4px] bg-card shadow-raised"
-            >
-              <StorageImage
-                path={instructor.photo_path}
-                alt={instructor.photo_alt}
-                sizes="(min-width: 1024px) 530px, 100vw"
-                className="relative h-[280px] bg-mist lg:h-[380px]"
-                imgClassName="object-cover object-top"
-              />
-              <div className="flex flex-col gap-2.5 p-5 lg:p-7">
-                <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
-                  <h3 className="text-xl leading-7 font-bold lg:text-[22px]">
-                    {instructor.name}
-                  </h3>
-                  <span className="inline-flex items-center gap-2 self-start rounded-full bg-mist px-3 py-1.5 text-[13px] font-bold text-ochre lg:self-auto">
-                    <span
-                      aria-hidden
-                      className="size-2.5 rounded-full bg-ink"
-                    />
-                    {instructor.rank}
-                  </span>
-                </div>
-                <p className="text-base leading-[26px] text-muted">
-                  {instructor.bio}
-                </p>
-              </div>
-            </article>
+        <InstructorCarousel
+          slides={instructors.map((instructor) => (
+            <InstructorCard key={instructor.id} instructor={instructor} />
           ))}
-        </div>
+        />
       )}
     </Section>
+  );
+}
+
+function InstructorCard({ instructor }: { instructor: Tables<"instructors"> }) {
+  return (
+    <article className="flex h-full flex-col overflow-hidden rounded-[4px] bg-card shadow-raised">
+      <StorageImage
+        path={instructor.photo_path}
+        alt={instructor.photo_alt}
+        sizes="(min-width: 1024px) 530px, 100vw"
+        className="relative h-[280px] shrink-0 bg-mist lg:h-[380px]"
+        imgClassName="object-cover object-top"
+      />
+      <div className="flex flex-col gap-2.5 p-5 lg:p-7">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-xl leading-7 font-bold lg:text-[22px]">
+            {instructor.name}
+          </h3>
+          {instructor.role && (
+            <p className="text-sm font-bold text-muted">{instructor.role}</p>
+          )}
+        </div>
+        <span className="inline-flex items-center gap-2 self-start rounded-full bg-mist px-3 py-1.5 text-[13px] font-bold text-ochre">
+          <span aria-hidden className="size-2.5 shrink-0 rounded-full bg-ink" />
+          {instructor.rank}
+        </span>
+        <p className="text-base leading-[26px] text-muted">{instructor.bio}</p>
+      </div>
+    </article>
   );
 }
