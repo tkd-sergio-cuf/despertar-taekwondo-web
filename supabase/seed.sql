@@ -42,7 +42,7 @@ insert into public.hero (
 insert into public.stats (value, label, description, sort_order) values
   ('3', 'sedes', 'En Bogotá', 1),
   ('5', 'años', 'Edad mínima para empezar', 2),
-  ('5', 'clases', 'Niños, adultos, mayores, mixta y privada', 3),
+  ('4', 'clases', 'Niños, adultos, mayores y privada', 3),
   ('$0', 'prueba', 'Tu primera clase es gratis', 4);
 
 insert into public.section_content (key, eyebrow, title, subtitle, body) values
@@ -109,16 +109,14 @@ from (values
 ) as v (slug, group_slug, name, description, highlights)
 join public.class_groups g on g.slug = v.group_slug;
 
--- Adulto mayor and Todos los niveles have no schedule yet and stay unpublished.
 -- Clases personalizadas are by appointment: listed here, never in the schedule.
 insert into public.programs (name, audience_label, description, time_label, group_id, color, image_path, image_alt, is_published, sort_order)
 select v.name, v.audience_label, v.description, v.time_label, g.id, v.color, v.image_path, v.image_alt, v.is_published, v.sort_order
 from (values
   ('Taekwondo niños', 'DESDE LOS 5 AÑOS', 'Llegan del colegio a entrenar coordinación, disciplina y confianza, con técnica real, juego y mucha paciencia.', 'Mié, vie, sáb y dom', 'ninos', null, 'programs/1790725638823.jpg', 'Clase de niños', true, 1),
   ('Jóvenes y adultos', 'DESDE LOS 15 AÑOS', 'Patadas, técnica, acondicionamiento y combate controlado para quienes quieren exigirse de verdad.', 'Mié, vie, sáb y dom', 'adultos', null, 'programs/1790725638823.jpg', 'Clase de adultos', true, 2),
-  ('Adulto mayor', 'MOVILIDAD Y BIENESTAR', 'Taekwondo con tai chi y chi kung: trabajo articular, equilibrio y respiración, a tu ritmo.', '11:00 – 12:00', 'mayor', null, 'programs/1790725638823.jpg', 'Clase de la mañana', false, 3),
-  ('Clase para todos los niveles', 'TODAS LAS EDADES', 'Niños, jóvenes y adultos entrenan juntos, cada uno a su nivel. Ideal para venir en familia.', '[DÍA] · [HORA]', null, '#141313', null, null, false, 4),
-  ('Clases personalizadas', 'PRIVADAS', 'Uno a uno o en grupo pequeño, con un plan según tu objetivo: cinturón, competencia o salud.', 'Con cita previa', null, '#e2b266', null, null, true, 5)
+  ('Adulto mayor', 'MOVILIDAD Y BIENESTAR', 'Taekwondo con tai chi y chi kung: trabajo articular, equilibrio y respiración, a tu ritmo.', 'Horario por confirmar', 'mayor', null, 'programs/1790725638823.jpg', 'Clase de la mañana', true, 3),
+  ('Clases personalizadas', 'PRIVADAS', 'Uno a uno o en grupo pequeño, con un plan según tu objetivo: cinturón, competencia o salud.', 'Con cita previa', null, '#e2b266', null, null, true, 4)
 ) as v (name, audience_label, description, time_label, group_slug, color, image_path, image_alt, is_published, sort_order)
 left join public.class_groups g on g.slug = v.group_slug;
 
