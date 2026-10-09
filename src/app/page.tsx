@@ -119,8 +119,8 @@ export default async function Home() {
         />
         <FreeClassForm
           section={sections.clase_gratis}
+          settings={settings}
           locations={locations}
-          programs={programs}
         />
         <Testimonials
           section={sections.testimonios}

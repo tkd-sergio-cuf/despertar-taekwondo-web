@@ -3,7 +3,7 @@ import type { TablesInsert } from "./database.types";
 
 export type FreeClassRequestInput = Pick<
   TablesInsert<"free_class_requests">,
-  "full_name" | "whatsapp" | "audience" | "location_id" | "class_group_id"
+  "full_name" | "whatsapp" | "audience" | "location_id" | "age"
 >;
 
 // No .select() after the insert: the public role can insert but not read the row back.

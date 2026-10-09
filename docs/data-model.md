@@ -69,6 +69,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | phone | text, null | "Tel." del footer |
 | email | text, null | correo del footer |
 | timezone | text | zona horaria del negocio (nombre IANA, p. ej. "America/Bogota"); se usa para calcular las próximas clases |
+| free_class_min_age, free_class_max_age | smallint | rango de edad que acepta el formulario de clase gratis (por defecto 5 y 80) |
 
 **`hero`** — una sola fila, garantizada por la base de datos (ver sección 4). Sección de inicio.
 
@@ -239,10 +240,12 @@ Los horarios del inicio ("Lunes a viernes", "Sábado y domingo") salen de agrupa
 | whatsapp | text | |
 | audience | text | para mí / mi hijo o hija / adulto mayor / varias personas |
 | location_id | uuid FK → locations | |
-| class_group_id | uuid FK → class_groups, null | "Clase de interés" |
+| age | smallint | edad de quien toma la clase |
 | status | text | `new`, `contacted`, `done` |
 
-Las opciones de "¿Para quién es la clase?" son fijas y viven en el código como valores del campo `audience`; las de sede y clase salen de `locations` y `class_groups`/`programs`.
+Las opciones de "¿Para quién es la clase?" son fijas y viven en el código como valores del campo `audience`; las de sede salen de `locations`. El rango de edad que acepta el formulario sale de `site_settings` (`free_class_min_age`, `free_class_max_age`).
+
+Cada solicitud se guarda en la tabla y, si el correo está configurado (variables `RESEND_API_KEY`, `NOTIFICATION_EMAIL_TO` y `NOTIFICATION_EMAIL_FROM`), se envía un aviso por Resend. Si el correo falla, la solicitud queda guardada igual.
 
 ## 4. Relaciones y restricciones
 
@@ -251,7 +254,7 @@ Las opciones de "¿Para quién es la clase?" son fijas y viven en el código com
 ```
 class_groups 1 ── N class_types ── N schedule_slots N ── 1 locations
 class_groups 1 ── N programs                              locations 1 ── N location_images
-class_groups 1 ── N free_class_requests N ── 1 locations
+locations 1 ── N free_class_requests
 ```
 
 Tablas sin relaciones (contenido suelto): `site_settings`, `hero`, `stats`, `section_content`, `values_principles`, `instructors`, `testimonials`, `faqs`, `social_links`.
@@ -268,6 +271,8 @@ Se definen en la base (no solo en el código) para que ningún dato inválido en
 | `schedule_slots` | CHECK | `end_time > start_time`. |
 | `testimonials` | CHECK | `rating` entre 1 y 5. |
 | `free_class_requests` | CHECK | `status` solo `new`, `contacted` o `done` (por defecto `new`). |
+| `free_class_requests` | CHECK | `age` entre 1 y 120. |
+| `site_settings` | CHECK | `free_class_min_age` ≥ 1, no mayor que `free_class_max_age`, y este ≤ 120. |
 
 ## 5. Qué sección del diseño alimenta cada tabla
 
@@ -279,7 +284,7 @@ Se definen en la base (no solo en el código) para que ningún dato inválido en
 | Clases | `section_content` (`clases`), `programs`, `class_groups` |
 | Sedes (pestañas, foto, dirección, mapa, horarios resumidos) | `section_content` (`sedes`), `locations`, `location_images`, `schedule_slots`, `class_types`, `class_groups` |
 | Nosotros (historia, cinco principios, instructor) | `section_content` (`nosotros`), `values_principles`, `instructors` |
-| Clase gratis (formulario) | `section_content` (`clase_gratis`), `free_class_requests`, `locations`, `class_groups` |
+| Clase gratis (formulario) | `section_content` (`clase_gratis`), `free_class_requests`, `locations`, `site_settings` (rango de edad) |
 | Testimonios | `section_content` (`testimonios`), `testimonials` |
 | Preguntas frecuentes | `section_content` (`faq`), `faqs` |
 | Contacto y footer | `section_content` (`contacto`), `site_settings`, `locations`, `social_links` |
