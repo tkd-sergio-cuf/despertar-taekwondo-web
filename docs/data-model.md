@@ -64,7 +64,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | favicon_path | text | |
 | og_image_path | text | |
 | seo_title, seo_description | text | |
-| whatsapp_number | text | número internacional sin símbolos |
+| whatsapp_number | text | número con indicativo de país, p. ej. "+57 300 000 0000"; el enlace usa solo los dígitos |
 | free_class_message | text | mensaje prellenado de WhatsApp para "Clase gratis" |
 | phone | text, null | "Tel." del footer |
 | email | text, null | correo del footer |
@@ -169,7 +169,7 @@ Los horarios del inicio ("Lunes a viernes", "Sábado y domingo") salen de agrupa
 | neighborhood_label | text | "Salitre · Bogotá" (pestañas) |
 | address | text | |
 | reference | text, null | punto de referencia |
-| phone | text, null | WhatsApp de la sede |
+| phone | text, null | WhatsApp de la sede, mismo formato que `whatsapp_number` |
 | whatsapp_message | text, null | mensaje prellenado de la sede |
 | maps_url | text | enlace "Cómo llegar" |
 | map_embed_url | text, null | mapa integrado |
