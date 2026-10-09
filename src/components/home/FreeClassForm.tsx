@@ -1,23 +1,15 @@
-import type { Location, Program, Tables } from "@/lib/data";
+import type { Location, Tables } from "@/lib/data";
 import { Glyph } from "@/components/ui/Glyph";
 import { Section } from "@/components/ui/Section";
+import { FreeClassFields } from "./FreeClassFields";
 
 type Props = {
   section: Tables<"section_content"> | undefined;
+  settings: Tables<"site_settings"> | null;
   locations: Location[];
-  programs: Program[];
 };
 
-// Fixed answers for "¿Para quién es la clase?"; the value is what free_class_requests.audience stores.
-const AUDIENCES = [
-  { value: "para_mi", label: "Para mí" },
-  { value: "hijo_hija", label: "Para mi hijo o hija" },
-  { value: "adulto_mayor", label: "Para un adulto mayor" },
-  { value: "varias", label: "Para varias personas" },
-];
-
-// Layout only: submitting the request is implemented in a separate branch.
-export function FreeClassForm({ section, locations, programs }: Props) {
+export function FreeClassForm({ section, settings, locations }: Props) {
   if (!section || locations.length === 0) return null;
   const checklist =
     section.body
@@ -62,80 +54,11 @@ export function FreeClassForm({ section, locations, programs }: Props) {
         )}
       </div>
 
-      <form className="card flex flex-col gap-4 p-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:p-10">
-        <Field label="Nombre completo">
-          <input
-            type="text"
-            name="full_name"
-            placeholder="Tu nombre"
-            autoComplete="name"
-            className="field"
-          />
-        </Field>
-        <Field label="WhatsApp">
-          <input
-            type="tel"
-            name="whatsapp"
-            placeholder="300 000 0000"
-            autoComplete="tel"
-            className="field"
-          />
-        </Field>
-        <Field label="¿Para quién es la clase?">
-          <select name="audience" className="field">
-            {AUDIENCES.map((a) => (
-              <option key={a.value} value={a.value}>
-                {a.label}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Sede">
-          <select name="location_id" className="field">
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        {programs.length > 0 && (
-          <Field label="Clase de interés" className="lg:col-span-2">
-            <select name="class_group_id" className="field">
-              {programs.map((p) => (
-                <option key={p.id} value={p.group_id ?? ""}>
-                  {p.class_group ? `${p.name} (${p.time_label})` : p.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-        )}
-        <div className="flex flex-col-reverse gap-4 pt-1 lg:col-span-2 lg:flex-row lg:items-center lg:justify-between lg:pt-2">
-          <p className="text-center text-[13px] font-medium text-muted lg:text-left lg:text-sm lg:leading-[22px]">
-            Sin costo y sin compromiso.
-          </p>
-          <button type="button" className="btn btn-accent">
-            Agendar mi clase gratis →
-          </button>
-        </div>
-      </form>
+      <FreeClassFields
+        locations={locations.map((l) => ({ id: l.id, name: l.name }))}
+        minAge={settings?.free_class_min_age ?? 1}
+        maxAge={settings?.free_class_max_age ?? 120}
+      />
     </Section>
-  );
-}
-
-function Field({
-  label,
-  className = "",
-  children,
-}: {
-  label: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`flex flex-col gap-2 text-sm font-bold ${className}`}>
-      {label}
-      {children}
-    </label>
   );
 }

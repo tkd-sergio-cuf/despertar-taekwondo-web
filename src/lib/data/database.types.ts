@@ -73,23 +73,17 @@ isOneToOne: false
                   ]
                 },"free_class_requests": {
                   Row: {
-                    "audience": string,"class_group_id": string | null,"created_at": string,"full_name": string,"id": string,"location_id": string,"status": string,"whatsapp": string
+                    "age": number,"audience": string,"created_at": string,"full_name": string,"id": string,"location_id": string,"status": string,"whatsapp": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "audience": string,"class_group_id"?: string | null,"created_at"?: string,"full_name": string,"id"?: string,"location_id": string,"status"?: string,"whatsapp": string
+                    "age": number,"audience": string,"created_at"?: string,"full_name": string,"id"?: string,"location_id": string,"status"?: string,"whatsapp": string
                   }
                   Update: {
-                    "audience"?: string,"class_group_id"?: string | null,"created_at"?: string,"full_name"?: string,"id"?: string,"location_id"?: string,"status"?: string,"whatsapp"?: string
+                    "age"?: number,"audience"?: string,"created_at"?: string,"full_name"?: string,"id"?: string,"location_id"?: string,"status"?: string,"whatsapp"?: string
                   }
                   Relationships: [
                     {
-      foreignKeyName: "free_class_requests_class_group_id_fkey"
-      columns: ["class_group_id"]
-isOneToOne: false
-      referencedRelation: "class_groups"
-      referencedColumns: ["id"]
-    },{
       foreignKeyName: "free_class_requests_location_id_fkey"
       columns: ["location_id"]
 isOneToOne: false
@@ -221,14 +215,14 @@ isOneToOne: false
                   ]
                 },"site_settings": {
                   Row: {
-                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at": string,"email": string | null,"favicon_path": string,"footer_description": string,"free_class_message": string,"id": string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone": string | null,"seo_description": string,"seo_title": string,"singleton": boolean,"timezone": string,"updated_at": string,"whatsapp_number": string
+                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at": string,"email": string | null,"favicon_path": string,"footer_description": string,"free_class_max_age": number,"free_class_message": string,"free_class_min_age": number,"id": string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone": string | null,"seo_description": string,"seo_title": string,"singleton": boolean,"timezone": string,"updated_at": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at"?: string,"email"?: string | null,"favicon_path": string,"footer_description": string,"free_class_message": string,"id"?: string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone"?: string | null,"seo_description": string,"seo_title": string,"singleton"?: boolean,"timezone"?: string,"updated_at"?: string,"whatsapp_number": string
+                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at"?: string,"email"?: string | null,"favicon_path": string,"footer_description": string,"free_class_max_age"?: number,"free_class_message": string,"free_class_min_age"?: number,"id"?: string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone"?: string | null,"seo_description": string,"seo_title": string,"singleton"?: boolean,"timezone"?: string,"updated_at"?: string,"whatsapp_number": string
                   }
                   Update: {
-                    "business_name"?: string,"business_subtitle"?: string,"city"?: string,"copyright_text"?: string,"created_at"?: string,"email"?: string | null,"favicon_path"?: string,"footer_description"?: string,"free_class_message"?: string,"id"?: string,"logo_alt"?: string,"logo_path"?: string,"og_image_path"?: string,"phone"?: string | null,"seo_description"?: string,"seo_title"?: string,"singleton"?: boolean,"timezone"?: string,"updated_at"?: string,"whatsapp_number"?: string
+                    "business_name"?: string,"business_subtitle"?: string,"city"?: string,"copyright_text"?: string,"created_at"?: string,"email"?: string | null,"favicon_path"?: string,"footer_description"?: string,"free_class_max_age"?: number,"free_class_message"?: string,"free_class_min_age"?: number,"id"?: string,"logo_alt"?: string,"logo_path"?: string,"og_image_path"?: string,"phone"?: string | null,"seo_description"?: string,"seo_title"?: string,"singleton"?: boolean,"timezone"?: string,"updated_at"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     
