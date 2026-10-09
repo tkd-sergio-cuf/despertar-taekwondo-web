@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { Location, ScheduleSlot, Tables } from "@/lib/data";
-import { summarizeSchedule } from "@/lib/schedule";
+import { getImageUrl } from "@/lib/data";
+import { formatRange, upcomingClasses } from "@/lib/schedule";
 import { whatsappHref } from "@/lib/whatsapp";
 import { Glyph } from "@/components/ui/Glyph";
 import { Section, SectionHeading } from "@/components/ui/Section";
-import { StorageImage } from "@/components/ui/StorageImage";
+import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { LocationGallery, type GalleryImage } from "./LocationGallery";
 import { LocationTabs } from "./LocationTabs";
 
 type Props = {
@@ -12,6 +14,8 @@ type Props = {
   locations: Location[];
   schedule: ScheduleSlot[];
   businessName: string | undefined;
+  // Business time zone, to date the upcoming classes.
+  timeZone: string;
 };
 
 export function Locations({
@@ -19,6 +23,7 @@ export function Locations({
   locations,
   schedule,
   businessName,
+  timeZone,
 }: Props) {
   if (!section || locations.length === 0) return null;
 
@@ -52,6 +57,7 @@ export function Locations({
             location={location}
             slots={schedule.filter((s) => s.location_id === location.id)}
             businessName={businessName}
+            timeZone={timeZone}
           />
         ))}
       />
@@ -63,38 +69,42 @@ type PanelProps = {
   location: Location;
   slots: ScheduleSlot[];
   businessName: string | undefined;
+  timeZone: string;
 };
 
-function LocationPanel({ location, slots, businessName }: PanelProps) {
-  const thumbs = location.images.slice(0, 3);
+// How many upcoming classes each location lists on the home page.
+const UPCOMING_LIMIT = 6;
+
+// Main photo first, then the location's other photos; entries without a file are skipped.
+function galleryImages(location: Location): GalleryImage[] {
+  return [
+    { path: location.main_image_path, alt: location.main_image_alt },
+    ...location.images,
+  ].flatMap(({ path, alt }) => {
+    const src = getImageUrl(path);
+    return src ? [{ src, alt }] : [];
+  });
+}
+
+function LocationPanel({
+  location,
+  slots,
+  businessName,
+  timeZone,
+}: PanelProps) {
+  const photos = galleryImages(location);
   const writeHref = whatsappHref(location.phone, location.whatsapp_message);
-  const summary = summarizeSchedule(slots);
+  const upcoming = upcomingClasses(slots, timeZone, UPCOMING_LIMIT);
   const scheduleHref = `/horarios?sede=${location.slug}`;
 
   return (
     <>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-8">
-        <div className="flex flex-col gap-2 lg:gap-3">
-          <StorageImage
-            path={location.main_image_path}
-            alt={location.main_image_alt}
-            sizes="(min-width: 1024px) 640px, 100vw"
-            className="card relative h-60 lg:h-[420px]"
-          />
-          {thumbs.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 lg:gap-3">
-              {thumbs.map((image) => (
-                <StorageImage
-                  key={image.id}
-                  path={image.path}
-                  alt={image.alt}
-                  sizes="(min-width: 1024px) 210px, 33vw"
-                  className="card relative h-24 lg:h-[150px]"
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {photos.length > 0 ? (
+          <LocationGallery images={photos} />
+        ) : (
+          <ImagePlaceholder className="card relative h-60 lg:h-[420px]" />
+        )}
 
         <div className="flex flex-col gap-4">
           <div className="card flex flex-col gap-2.5 p-5 lg:gap-3.5 lg:p-7">
@@ -141,9 +151,9 @@ function LocationPanel({ location, slots, businessName }: PanelProps) {
       <div className="flex flex-col gap-4">
         <div className="flex items-baseline justify-between">
           <h3 className="mt-4 text-xl leading-7 font-bold lg:mt-0 lg:text-2xl lg:leading-[30px]">
-            Horarios · {location.short_name}
+            Próximas clases · {location.short_name}
           </h3>
-          {summary.length > 0 && (
+          {upcoming.length > 0 && (
             <Link
               href={scheduleHref}
               className="btn btn-accent hidden min-h-12! lg:inline-flex"
@@ -152,36 +162,48 @@ function LocationPanel({ location, slots, businessName }: PanelProps) {
             </Link>
           )}
         </div>
-        {summary.length === 0 ? (
+        {upcoming.length === 0 ? (
           <p className="card p-5 text-sm font-medium text-muted">
             Horario por confirmar.
           </p>
         ) : (
           <>
-            <ul className="card flex flex-col px-[18px] lg:grid lg:grid-cols-5 lg:gap-3 lg:bg-transparent lg:p-0 lg:shadow-none">
-              {summary.map((item) => (
-                <li
-                  key={item.key}
-                  className="flex items-center justify-between gap-3 border-b border-line py-3.5 last:border-0 lg:flex-col-reverse lg:items-start lg:justify-end lg:gap-2 lg:rounded-[4px] lg:border-0 lg:bg-card lg:p-5 lg:shadow-[inset_0_0_0_1px_var(--color-line)]"
-                >
-                  <div className="flex flex-col gap-0.5 lg:gap-2">
-                    <span className="flex items-center gap-2 text-base leading-[22px] font-bold">
-                      <span
-                        aria-hidden
-                        className="size-2.5 shrink-0 rounded-full"
-                        style={{ background: item.color }}
-                      />
-                      {item.label}
-                    </span>
-                    <span className="text-[13px] font-medium text-muted lg:text-sm lg:leading-[22px]">
-                      {item.days}
-                    </span>
-                  </div>
-                  <span className="text-sm font-bold whitespace-nowrap lg:font-display lg:text-lg lg:leading-6 lg:font-extrabold lg:[font-stretch:110%]">
-                    {item.time}
-                  </span>
-                </li>
-              ))}
+            <ul className="card flex flex-col px-[18px] lg:grid lg:grid-cols-3 lg:gap-3 lg:bg-transparent lg:p-0 lg:shadow-none">
+              {upcoming.map(({ key, slot, dayLabel, dateLabel }) => {
+                const group = slot.class_type.class_group;
+                return (
+                  <li
+                    key={key}
+                    className="flex items-center justify-between gap-3 border-b border-line py-3.5 last:border-0 lg:flex-col-reverse lg:items-start lg:justify-end lg:gap-2 lg:rounded-[4px] lg:border-0 lg:bg-card lg:p-5 lg:shadow-[inset_0_0_0_1px_var(--color-line)]"
+                  >
+                    <div className="flex flex-col gap-0.5 lg:gap-2">
+                      <span className="flex items-center gap-2 text-base leading-[22px] font-bold">
+                        <span
+                          aria-hidden
+                          className="size-2.5 shrink-0 rounded-full"
+                          style={{ background: group.color_dot }}
+                        />
+                        {slot.class_type.name}
+                      </span>
+                      <span className="text-[13px] font-medium text-muted lg:text-sm lg:leading-[22px]">
+                        {group.label}
+                        <span className="hidden lg:inline">
+                          {" "}
+                          · {formatRange(slot.start_time, slot.end_time)}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5 text-right whitespace-nowrap lg:items-start lg:text-left">
+                      <span className="text-sm font-bold lg:font-display lg:text-lg lg:leading-6 lg:font-extrabold lg:[font-stretch:110%]">
+                        {dayLabel} · {dateLabel}
+                      </span>
+                      <span className="text-[13px] font-medium text-muted lg:hidden">
+                        {formatRange(slot.start_time, slot.end_time)}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
             <Link href={scheduleHref} className="btn btn-accent lg:hidden">
               Ver horario completo →

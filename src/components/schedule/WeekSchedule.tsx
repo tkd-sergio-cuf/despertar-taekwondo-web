@@ -6,6 +6,7 @@ import {
   WEEKDAYS,
   formatRange,
   formatTime,
+  layoutLanes,
   toHours,
   weekday,
 } from "@/lib/schedule";
@@ -33,11 +34,41 @@ const DESKTOP_PX_PER_HOUR = 60;
 const MOBILE_PX_PER_HOUR = 48;
 const GRID_OFFSET = 10;
 
-function blockPosition(c: ScheduleClass, startHour: number, pxPerHour: number) {
-  return {
-    top: Math.round((toHours(c.start) - startHour) * pxPerHour) + GRID_OFFSET,
-    height: Math.round((toHours(c.end) - toHours(c.start)) * pxPerHour) - 4,
-  };
+type Position = {
+  top: number;
+  height: number;
+  left: string;
+  width: string;
+  // Shares its time slot with another class, so it only gets part of the column.
+  shared: boolean;
+};
+
+// Position of every class of one day; simultaneous classes share the column width.
+function dayPositions(
+  dayClasses: ScheduleClass[],
+  startHour: number,
+  pxPerHour: number,
+  gap: number,
+): Map<string, Position> {
+  const lanes = layoutLanes(dayClasses);
+  return new Map(
+    dayClasses.map((c) => {
+      const { lane, lanes: count } = lanes.get(c.id)!;
+      return [
+        c.id,
+        {
+          top:
+            Math.round((toHours(c.start) - startHour) * pxPerHour) +
+            GRID_OFFSET,
+          height:
+            Math.round((toHours(c.end) - toHours(c.start)) * pxPerHour) - 4,
+          left: `calc(${(lane / count) * 100}% + ${gap}px)`,
+          width: `calc(${100 / count}% - ${gap * 2}px)`,
+          shared: count > 1,
+        },
+      ];
+    }),
+  );
 }
 
 export function WeekSchedule({ classes, locationName, hours }: Props) {
@@ -108,18 +139,13 @@ export function WeekSchedule({ classes, locationName, hours }: Props) {
               labelWidth="44px"
               columns={1}
             >
-              <DayColumn>
-                {dayClasses.map((c) => (
-                  <ClassBlock
-                    key={c.id}
-                    c={c}
-                    active={c.id === selected.id}
-                    onPick={() => setSelectedId(c.id)}
-                    position={blockPosition(c, hours.start, MOBILE_PX_PER_HOUR)}
-                    variant="mobile"
-                  />
-                ))}
-              </DayColumn>
+              <DayColumn
+                classes={dayClasses}
+                selectedId={selected.id}
+                onPick={setSelectedId}
+                startHour={hours.start}
+                variant="mobile"
+              />
             </TimeGrid>
           )}
         </div>
@@ -143,24 +169,14 @@ export function WeekSchedule({ classes, locationName, hours }: Props) {
           columns={7}
         >
           {WEEKDAYS.map((d) => (
-            <DayColumn key={d.value}>
-              {classes
-                .filter((c) => c.weekday === d.value)
-                .map((c) => (
-                  <ClassBlock
-                    key={c.id}
-                    c={c}
-                    active={c.id === selected.id}
-                    onPick={() => setSelectedId(c.id)}
-                    position={blockPosition(
-                      c,
-                      hours.start,
-                      DESKTOP_PX_PER_HOUR,
-                    )}
-                    variant="desktop"
-                  />
-                ))}
-            </DayColumn>
+            <DayColumn
+              key={d.value}
+              classes={classes.filter((c) => c.weekday === d.value)}
+              selectedId={selected.id}
+              onPick={setSelectedId}
+              startHour={hours.start}
+              variant="desktop"
+            />
           ))}
         </TimeGrid>
       </div>
@@ -272,19 +288,54 @@ function TimeGrid({
   );
 }
 
-function DayColumn({ children }: { children: React.ReactNode }) {
-  return <div className="relative border-l border-mist">{children}</div>;
+type DayColumnProps = {
+  classes: ScheduleClass[];
+  selectedId: string;
+  onPick: (id: string) => void;
+  startHour: number;
+  variant: "desktop" | "mobile";
+};
+
+function DayColumn({
+  classes,
+  selectedId,
+  onPick,
+  startHour,
+  variant,
+}: DayColumnProps) {
+  const mobile = variant === "mobile";
+  const positions = dayPositions(
+    classes,
+    startHour,
+    mobile ? MOBILE_PX_PER_HOUR : DESKTOP_PX_PER_HOUR,
+    mobile ? 4 : 3,
+  );
+  return (
+    <div className="relative border-l border-mist">
+      {classes.map((c) => (
+        <ClassBlock
+          key={c.id}
+          c={c}
+          active={c.id === selectedId}
+          onPick={() => onPick(c.id)}
+          position={positions.get(c.id)!}
+          variant={variant}
+        />
+      ))}
+    </div>
+  );
 }
 
 type BlockProps = {
   c: ScheduleClass;
   active: boolean;
   onPick: () => void;
-  position: { top: number; height: number };
+  position: Position;
   variant: "desktop" | "mobile";
 };
 
 function ClassBlock({ c, active, onPick, position, variant }: BlockProps) {
+  const { shared, ...box } = position;
   const mobile = variant === "mobile";
   return (
     <button
@@ -293,12 +344,11 @@ function ClassBlock({ c, active, onPick, position, variant }: BlockProps) {
       onClick={onPick}
       className={`absolute flex overflow-hidden rounded-[4px] text-left ${
         mobile
-          ? "inset-x-1 items-start justify-between gap-2 px-3 py-2"
-          : "inset-x-[3px] flex-col items-start gap-0.5 px-2 py-[7px]"
+          ? "flex-wrap items-start justify-between gap-x-2 px-3 py-2"
+          : `flex-col items-start gap-0.5 py-[7px] ${shared ? "px-1" : "px-2"}`
       } ${active ? "shadow-block" : ""}`}
       style={{
-        top: position.top,
-        height: position.height,
+        ...box,
         background: active ? c.group.dot : c.group.soft,
         boxShadow: active ? undefined : `inset 0 3px 0 ${c.group.dot}`,
       }}
@@ -307,7 +357,7 @@ function ClassBlock({ c, active, onPick, position, variant }: BlockProps) {
         className={
           mobile
             ? "text-sm leading-[18px] font-bold"
-            : "text-xs leading-[15px] font-bold"
+            : `w-full leading-[15px] font-bold wrap-anywhere hyphens-auto ${shared ? "text-[11px]" : "text-xs"}`
         }
       >
         {c.name}

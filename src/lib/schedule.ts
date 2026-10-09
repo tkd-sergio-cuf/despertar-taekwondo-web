@@ -30,93 +30,97 @@ export function toHours(time: string): number {
   return h + m / 60;
 }
 
-// [1,2,3,4,5] → "Lunes a viernes", [6,7] → "Sábado y domingo", [1,3] → "Lunes y miércoles"
-export function formatDays(days: number[]): string {
-  const sorted = [...new Set(days)].sort((a, b) => a - b);
-  const names = sorted.map((d, i) =>
-    i === 0 ? weekday(d).full : weekday(d).full.toLowerCase(),
-  );
-  const consecutive = sorted.every(
-    (d, i) => i === 0 || d === sorted[i - 1] + 1,
-  );
-  if (sorted.length >= 3 && consecutive)
-    return `${names[0]} a ${names[names.length - 1]}`;
-  if (names.length <= 1) return names[0] ?? "";
-  return `${names.slice(0, -1).join(", ")} y ${names[names.length - 1]}`;
+const MONTHS = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic",
+];
+
+// Today's calendar date, weekday (1 = Monday) and time in the business time zone.
+function nowIn(timeZone: string, now: Date) {
+  const format = (zone: string) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: zone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(now);
+  let parts: Intl.DateTimeFormatPart[];
+  try {
+    parts = format(timeZone);
+  } catch {
+    // Unknown zone name in the database.
+    parts = format("UTC");
+  }
+  const get = (type: string) =>
+    Number(parts.find((part) => part.type === type)?.value);
+  // A UTC date that only carries the calendar day, so adding days is safe.
+  const today = new Date(Date.UTC(get("year"), get("month") - 1, get("day")));
+  return {
+    today,
+    weekday: today.getUTCDay() || 7,
+    time: `${String(get("hour")).padStart(2, "0")}:${String(get("minute")).padStart(2, "0")}`,
+  };
 }
 
-export type ScheduleSummaryItem = {
+export type UpcomingClass = {
   key: string;
-  time: string;
-  label: string;
-  color: string;
-  days: string;
+  slot: ScheduleSlot;
+  // "Hoy", "Mañana" or the weekday.
+  dayLabel: string;
+  // "14 oct"
+  dateLabel: string;
 };
 
-// Home page summary: back-to-back slots of the same group are merged into one block
-// (counting the turns), and identical blocks on different days are listed once.
-export function summarizeSchedule(
+// The next classes of a weekly schedule, with their actual dates. A class that
+// already started today moves to next week.
+export function upcomingClasses(
   slots: ScheduleSlot[],
-): ScheduleSummaryItem[] {
-  type Block = {
-    groupId: string;
-    label: string;
-    color: string;
-    start: string;
-    end: string;
-    turns: number;
-    day: number;
-  };
-  const blocks: Block[] = [];
-
-  for (const day of WEEKDAYS) {
-    const daySlots = slots
-      .filter((s) => s.weekday === day.value)
-      .sort((a, b) => a.start_time.localeCompare(b.start_time));
-    for (const slot of daySlots) {
-      const group = slot.class_type.class_group;
-      const last = blocks[blocks.length - 1];
-      if (
-        last &&
-        last.day === day.value &&
-        last.groupId === group.id &&
-        last.end === slot.start_time
-      ) {
-        last.end = slot.end_time;
-        last.turns += 1;
-      } else {
-        blocks.push({
-          groupId: group.id,
-          label: group.label,
-          color: group.color_dot,
-          start: slot.start_time,
-          end: slot.end_time,
-          turns: 1,
-          day: day.value,
-        });
-      }
-    }
-  }
-
-  const merged = new Map<string, Block & { days: number[] }>();
-  for (const block of blocks) {
-    const key = `${block.groupId}|${block.start}|${block.end}|${block.turns}`;
-    const existing = merged.get(key);
-    if (existing) existing.days.push(block.day);
-    else merged.set(key, { ...block, days: [block.day] });
-  }
-
-  return [...merged.entries()]
+  timeZone: string,
+  limit: number,
+  now: Date = new Date(),
+): UpcomingClass[] {
+  const current = nowIn(timeZone, now);
+  return slots
+    .map((slot) => {
+      let daysAhead = (slot.weekday - current.weekday + 7) % 7;
+      if (daysAhead === 0 && slot.start_time.slice(0, 5) <= current.time)
+        daysAhead = 7;
+      return { slot, daysAhead };
+    })
     .sort(
-      ([, a], [, b]) => a.days[0] - b.days[0] || a.start.localeCompare(b.start),
+      (a, b) =>
+        a.daysAhead - b.daysAhead ||
+        a.slot.start_time.localeCompare(b.slot.start_time),
     )
-    .map(([key, b]) => ({
-      key,
-      time: formatRange(b.start, b.end),
-      label: b.turns > 1 ? `${b.label} · ${b.turns} turnos` : b.label,
-      color: b.color,
-      days: formatDays(b.days),
-    }));
+    .slice(0, limit)
+    .map(({ slot, daysAhead }) => {
+      const date = new Date(current.today);
+      date.setUTCDate(date.getUTCDate() + daysAhead);
+      return {
+        key: slot.id,
+        slot,
+        dayLabel:
+          daysAhead === 0
+            ? "Hoy"
+            : daysAhead === 1
+              ? "Mañana"
+              : weekday(slot.weekday).full,
+        dateLabel: `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`,
+      };
+    });
 }
 
 // Hour range shown on the weekly grid, rounded to whole hours around the data.
@@ -129,4 +133,36 @@ export function hourRange(slots: ScheduleSlot[]): {
     start: Math.floor(Math.min(...slots.map((s) => toHours(s.start_time)))),
     end: Math.ceil(Math.max(...slots.map((s) => toHours(s.end_time)))),
   };
+}
+
+// Classes that overlap in time on the same day are drawn side by side: each gets
+// a lane, and `lanes` is how many lanes its group of overlapping classes needs.
+export function layoutLanes<
+  T extends { id: string; start: string; end: string },
+>(items: T[]): Map<string, { lane: number; lanes: number }> {
+  const layout = new Map<string, { lane: number; lanes: number }>();
+  const sorted = [...items].sort(
+    (a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end),
+  );
+
+  let cluster: T[] = [];
+  let laneEnds: string[] = [];
+  let clusterEnd = "";
+  const closeCluster = () => {
+    for (const item of cluster) layout.get(item.id)!.lanes = laneEnds.length;
+    cluster = [];
+    laneEnds = [];
+  };
+
+  for (const item of sorted) {
+    if (cluster.length > 0 && item.start >= clusterEnd) closeCluster();
+    let lane = laneEnds.findIndex((end) => end <= item.start);
+    if (lane === -1) lane = laneEnds.length;
+    laneEnds[lane] = item.end;
+    layout.set(item.id, { lane, lanes: 1 });
+    cluster.push(item);
+    if (item.end > clusterEnd || cluster.length === 1) clusterEnd = item.end;
+  }
+  closeCluster();
+  return layout;
 }

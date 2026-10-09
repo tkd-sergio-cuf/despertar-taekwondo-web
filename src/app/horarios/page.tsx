@@ -96,7 +96,7 @@ export default async function SchedulePage({
           </p>
         ) : (
           <>
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+            <div className="flex flex-col gap-5 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between lg:gap-x-10 lg:gap-y-6">
               <div className="flex max-w-[620px] flex-col gap-2.5 lg:gap-3">
                 <p className="eyebrow text-brand-text">Horarios</p>
                 <h1 className="text-[28px] leading-[34px] font-bold tracking-[-0.01em] lg:text-[40px] lg:leading-[46px]">
@@ -113,7 +113,10 @@ export default async function SchedulePage({
                 </p>
               </div>
               {locations.length > 1 && (
-                <nav aria-label="Sedes" className="flex gap-2 lg:gap-3">
+                <nav
+                  aria-label="Sedes"
+                  className="flex flex-wrap gap-2 lg:gap-3"
+                >
                   {locations.map((l) => {
                     const active = l.id === location.id;
                     return (
@@ -121,7 +124,7 @@ export default async function SchedulePage({
                         key={l.id}
                         href={`/horarios?sede=${l.slug}`}
                         aria-current={active ? "page" : undefined}
-                        className={`flex min-h-14 flex-1 flex-col items-start justify-center gap-0.5 rounded-[12px] px-3.5 text-sm font-bold tracking-[0.04em] text-ink uppercase no-underline lg:flex-none lg:px-6 lg:text-[15px] ${
+                        className={`flex min-h-14 min-w-[30%] flex-1 flex-col items-start justify-center gap-0.5 rounded-[12px] px-3.5 text-sm font-bold tracking-[0.04em] text-ink uppercase no-underline lg:min-w-0 lg:flex-none lg:px-6 lg:text-[15px] ${
                           active
                             ? "bg-accent"
                             : "bg-card shadow-[inset_0_0_0_1.5px_var(--color-line-strong)]"
