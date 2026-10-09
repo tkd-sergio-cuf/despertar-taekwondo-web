@@ -121,7 +121,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | color_dot, color_soft, color_ink | text | colores hex de leyenda, fondo y texto |
 | sort_order | int | |
 
-**`class_types`** — tipos de clase que aparecen en el panel "Qué se trabaja" (19 en el diseño: Equilibrio, Combate, Poomsae, etc.).
+**`class_types`** — tipos de clase que aparecen en el panel "Qué se trabaja" (20 en el diseño: Equilibrio, Combate, Poomsae, etc.).
 
 | Columna | Tipo | Nota |
 |---|---|---|
