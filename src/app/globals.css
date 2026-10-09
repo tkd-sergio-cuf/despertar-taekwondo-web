@@ -1,26 +1,176 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Design tokens taken from design/. Class group colors come from the database instead. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-ink: #141313;
+  --color-paper: #eeedeb;
+  --color-mist: #e3e1de;
+  --color-card: #f8f7f5;
+  --color-photo: #dcd9d5;
+  --color-line: #d2cfcb;
+  --color-line-strong: #857f7a;
+  --color-map-road: #c9c5c0;
+  --color-muted: #57534f;
+  --color-brand: #b01e2f;
+  --color-brand-hover: #961928;
+  --color-brand-text: #a51b2b;
+  --color-wine: #7a1320;
+  --color-accent: #e8c21e;
+  --color-accent-hover: #f2d34a;
+  --color-ochre: #8a5a12;
+  --color-info: #2e579f;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-manrope), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-archivo), "Arial Black", system-ui, sans-serif;
+  --font-korean: var(--font-noto-kr), sans-serif;
+
+  --radius-card: 4px;
+  --radius-control: 12px;
+  --radius-panel: 28px;
+
+  --shadow-raised: 0 12px 32px rgba(20, 19, 19, 0.12);
+  --shadow-block: 0 8px 18px rgba(20, 19, 19, 0.18);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-paper),
+    0 0 0 4px var(--color-brand-text);
+}
+
+/* Archivo at 125% width, the display face of the design. */
+@utility display {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-weight: 800;
+}
+
+@utility eyebrow {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@utility hangul {
+  font-family: var(--font-korean);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Large outlined Korean characters used as section decoration. */
+@utility glyph {
+  font-family: var(--font-korean);
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-line-strong);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
+@utility card {
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+}
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: var(--radius-control);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  @media (width >= 64rem) {
+    padding: 0 30px;
+    white-space: nowrap;
+  }
+}
+
+@utility btn-brand {
+  background: var(--color-brand);
+  color: #ffffff;
+  &:hover {
+    background: var(--color-brand-hover);
+  }
+}
+
+@utility btn-accent {
+  background: var(--color-accent);
+  color: var(--color-ink);
+  &:hover {
+    background: var(--color-accent-hover);
+  }
+}
+
+@utility btn-line {
+  background: transparent;
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1.5px var(--color-line-strong);
+  &:hover {
+    box-shadow: inset 0 0 0 1.5px var(--color-ink);
+  }
+}
+
+/* Uppercase text link with the yellow underline. */
+@utility link-accent {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+  &:hover {
+    color: var(--color-brand-text);
+  }
+}
+
+/* Neutral stand-in for a map when there is no embed URL. */
+@utility map-pattern {
+  background-color: var(--color-card);
+  background-image:
+    linear-gradient(28deg, transparent 47%, var(--color-line) 47%, var(--color-line) 49%, transparent 49%),
+    linear-gradient(118deg, transparent 58%, var(--color-map-road) 58%, var(--color-map-road) 61%, transparent 61%),
+    repeating-linear-gradient(0deg, transparent 0 58px, var(--color-photo) 58px 60px),
+    repeating-linear-gradient(90deg, transparent 0 76px, var(--color-photo) 76px 78px);
+}
+
+@utility field {
+  height: 52px;
+  width: 100%;
+  padding: 0 16px;
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+  color: var(--color-ink);
+  border: 1.5px solid var(--color-line-strong);
+  font: 500 16px var(--font-sans);
 }

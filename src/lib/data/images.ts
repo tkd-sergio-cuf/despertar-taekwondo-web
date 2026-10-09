@@ -1,4 +1,4 @@
-import { getSupabaseUrl } from "./client";
+import { getSupabaseUrl } from "./env";
 
 const BUCKET = "site-media";
 
