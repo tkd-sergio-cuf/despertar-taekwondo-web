@@ -189,12 +189,13 @@ Los horarios del inicio ("Lunes a viernes", "Sábado y domingo") salen de agrupa
 
 ### 3.4 Personas y opiniones
 
-**`instructors`** — bloque "Instructor" en Nosotros.
+**`instructors`** — bloque "Instructores" en Nosotros. Si hay más de uno, se recorren con flechas.
 
 | Columna | Tipo | Nota |
 |---|---|---|
 | name | text | |
-| rank | text | grado, p. ej. "3er Dan" |
+| role | text, null | cargo en la escuela, p. ej. "Fundador e instructor" |
+| rank | text | grado y quién lo certifica, p. ej. "3.er Dan · Kukkiwon" |
 | bio | text | trayectoria, logros, certificaciones |
 | photo_path, photo_alt | text | |
 | is_published | boolean | |
