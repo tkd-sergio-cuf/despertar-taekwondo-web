@@ -18,7 +18,7 @@ insert into public.site_settings (
   'hero/persona sin fondo.png',
   'Despertar · Escuela de Taekwondo',
   'Escuela de Taekwondo en Bogotá. Clases para niños desde los 5 años, jóvenes, adultos y adulto mayor en Salitre y Modelia.',
-  '[NÚMERO]',
+  '+57 312 682 4257',
   'Hola Despertar, quiero agendar mi clase gratis de Taekwondo',
   '[TELÉFONO]',
   '[CORREO]@gmail.com'
@@ -125,12 +125,12 @@ insert into public.locations (
   whatsapp_message, maps_url, main_image_path, main_image_alt, sort_order
 ) values
   ('salitre', 'Sede Salitre', 'Salitre', 'Salitre · Bogotá', '[DIRECCIÓN SEDE SALITRE]',
-    '[PUNTO DE REFERENCIA, p. ej. cerca de …]', '[NÚMERO SALITRE]',
+    '[PUNTO DE REFERENCIA, p. ej. cerca de …]', '+57 312 682 4257',
     'Hola Despertar Sede Salitre, quiero información',
     'https://www.google.com/maps/search/?api=1&query=Salitre+Bogota',
     'locations/salitre/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Salitre', 1),
   ('modelia', 'Sede Modelia', 'Modelia', 'Modelia · Bogotá', '[DIRECCIÓN SEDE MODELIA]',
-    '[PUNTO DE REFERENCIA, p. ej. cerca de …]', '[NÚMERO MODELIA]',
+    '[PUNTO DE REFERENCIA, p. ej. cerca de …]', '+57 312 682 4257',
     'Hola Despertar Sede Modelia, quiero información',
     'https://www.google.com/maps/search/?api=1&query=Modelia+Bogota',
     'locations/modelia/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Modelia', 2);
