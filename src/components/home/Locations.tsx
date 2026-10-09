@@ -158,7 +158,9 @@ function LocationPanel({ location, slots, businessName }: PanelProps) {
           </p>
         ) : (
           <>
-            <ul className="card flex flex-col px-[18px] lg:grid lg:grid-cols-5 lg:gap-3 lg:bg-transparent lg:p-0 lg:shadow-none">
+            <ul
+              className={`card flex flex-col px-[18px] lg:grid lg:gap-3 lg:bg-transparent lg:p-0 lg:shadow-none ${summaryColumns(summary.length)}`}
+            >
               {summary.map((item) => (
                 <li
                   key={item.key}
@@ -191,6 +193,13 @@ function LocationPanel({ location, slots, businessName }: PanelProps) {
       </div>
     </>
   );
+}
+
+// Desktop columns for the schedule summary: one row up to five cards, then even rows.
+function summaryColumns(count: number): string {
+  if (count <= 5) return "lg:grid-cols-5";
+  if (count === 6) return "lg:grid-cols-3";
+  return "lg:grid-cols-4";
 }
 
 function LocationMap({

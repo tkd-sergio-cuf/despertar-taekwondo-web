@@ -75,13 +75,14 @@ export function summarizeSchedule(
       .sort((a, b) => a.start_time.localeCompare(b.start_time));
     for (const slot of daySlots) {
       const group = slot.class_type.class_group;
-      const last = blocks[blocks.length - 1];
-      if (
-        last &&
-        last.day === day.value &&
-        last.groupId === group.id &&
-        last.end === slot.start_time
-      ) {
+      // Groups can run at the same time, so look for this group's own previous block.
+      const last = blocks.findLast(
+        (b) =>
+          b.day === day.value &&
+          b.groupId === group.id &&
+          b.end === slot.start_time,
+      );
+      if (last) {
         last.end = slot.end_time;
         last.turns += 1;
       } else {
@@ -129,4 +130,36 @@ export function hourRange(slots: ScheduleSlot[]): {
     start: Math.floor(Math.min(...slots.map((s) => toHours(s.start_time)))),
     end: Math.ceil(Math.max(...slots.map((s) => toHours(s.end_time)))),
   };
+}
+
+// Classes that overlap in time on the same day are drawn side by side: each gets
+// a lane, and `lanes` is how many lanes its group of overlapping classes needs.
+export function layoutLanes<
+  T extends { id: string; start: string; end: string },
+>(items: T[]): Map<string, { lane: number; lanes: number }> {
+  const layout = new Map<string, { lane: number; lanes: number }>();
+  const sorted = [...items].sort(
+    (a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end),
+  );
+
+  let cluster: T[] = [];
+  let laneEnds: string[] = [];
+  let clusterEnd = "";
+  const closeCluster = () => {
+    for (const item of cluster) layout.get(item.id)!.lanes = laneEnds.length;
+    cluster = [];
+    laneEnds = [];
+  };
+
+  for (const item of sorted) {
+    if (cluster.length > 0 && item.start >= clusterEnd) closeCluster();
+    let lane = laneEnds.findIndex((end) => end <= item.start);
+    if (lane === -1) lane = laneEnds.length;
+    laneEnds[lane] = item.end;
+    layout.set(item.id, { lane, lanes: 1 });
+    cluster.push(item);
+    if (item.end > clusterEnd || cluster.length === 1) clusterEnd = item.end;
+  }
+  closeCluster();
+  return layout;
 }

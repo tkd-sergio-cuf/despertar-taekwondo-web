@@ -59,7 +59,9 @@ export function Programs({
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+      <div
+        className={`grid gap-4 md:grid-cols-2 lg:gap-6 ${featured.length >= 3 ? "lg:grid-cols-3" : ""}`}
+      >
         {featured.map((program) => (
           <ProgramCard
             key={program.id}

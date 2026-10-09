@@ -17,7 +17,7 @@ insert into public.site_settings (
   'brand/Logo.png',
   'hero/persona sin fondo.png',
   'Despertar · Escuela de Taekwondo',
-  'Escuela de Taekwondo en Bogotá. Clases para niños desde los 5 años, jóvenes, adultos y adulto mayor en Salitre y Modelia.',
+  'Escuela de Taekwondo en Bogotá. Clases para niños desde los 5 años, jóvenes, adultos y adulto mayor en Salitre.',
   '+57 312 682 4257',
   'Hola Despertar, quiero agendar mi clase gratis de Taekwondo',
   '[TELÉFONO]',
@@ -31,7 +31,7 @@ insert into public.hero (
   'Escuela de Taekwondo · Bogotá',
   'Despierta tu',
   'fuerza',
-  'Clases para niños desde los 5 años, jóvenes, adultos y adulto mayor en nuestras sedes de Salitre y Modelia. Aquí hay una clase para ti.',
+  'Clases para niños desde los 5 años, jóvenes, adultos y adulto mayor en nuestra sede de Salitre. Aquí hay una clase para ti.',
   'Reserva tu clase gratis →',
   'Conoce las sedes',
   'Primera clase sin costo',
@@ -40,7 +40,7 @@ insert into public.hero (
 );
 
 insert into public.stats (value, label, description, sort_order) values
-  ('2', 'sedes', 'Salitre y Modelia', 1),
+  ('1', 'sede', 'Salitre · Bogotá', 1),
   ('5', 'años', 'Edad mínima para empezar', 2),
   ('5', 'clases', 'Niños, adultos, mayores, mixta y privada', 3),
   ('$0', 'prueba', 'Tu primera clase es gratis', 4);
@@ -78,7 +78,7 @@ insert into public.values_principles (name, name_ko, sort_order) values
 insert into public.class_groups (slug, label, color_dot, color_soft, color_ink, sort_order) values
   ('mayor', 'Adulto mayor', '#3fa35f', '#e3efe6', '#1f6b39', 1),
   ('ninos', 'Niños', '#e8c21e', '#f7eec9', '#7a5c00', 2),
-  ('adultos', 'Jóvenes y adultos', '#4a7fd4', '#e0e8f6', '#1d3d73', 3);
+  ('adultos', 'Adultos (+15 años)', '#4a7fd4', '#e0e8f6', '#1d3d73', 3);
 
 insert into public.class_types (slug, group_id, name, description, highlights)
 select v.slug, g.id, v.name, v.description, v.highlights
@@ -109,31 +109,29 @@ from (values
 ) as v (slug, group_slug, name, description, highlights)
 join public.class_groups g on g.slug = v.group_slug;
 
-insert into public.programs (name, audience_label, description, time_label, group_id, color, image_path, image_alt, sort_order)
-select v.name, v.audience_label, v.description, v.time_label, g.id, v.color, v.image_path, v.image_alt, v.sort_order
+-- Programs without a schedule yet are kept unpublished.
+insert into public.programs (name, audience_label, description, time_label, group_id, color, image_path, image_alt, is_published, sort_order)
+select v.name, v.audience_label, v.description, v.time_label, g.id, v.color, v.image_path, v.image_alt, v.is_published, v.sort_order
 from (values
-  ('Taekwondo niños', 'DESDE LOS 5 AÑOS', 'Llegan del colegio a entrenar coordinación, disciplina y confianza, con técnica real, juego y mucha paciencia.', '15:00 – 17:00', 'ninos', null, 'programs/1790725638823.jpg', 'Clase de niños', 1),
-  ('Jóvenes y adultos', 'ALTA INTENSIDAD', 'Patadas, técnica, acondicionamiento y combate controlado para quienes quieren exigirse de verdad.', '17:00 – 20:00', 'adultos', null, 'programs/1790725638823.jpg', 'Clase de adultos', 2),
-  ('Adulto mayor', 'MOVILIDAD Y BIENESTAR', 'Taekwondo con tai chi y chi kung: trabajo articular, equilibrio y respiración, a tu ritmo.', '11:00 – 12:00', 'mayor', null, 'programs/1790725638823.jpg', 'Clase de la mañana', 3),
-  ('Clase para todos los niveles', 'TODAS LAS EDADES', 'Niños, jóvenes y adultos entrenan juntos, cada uno a su nivel. Ideal para venir en familia.', '[DÍA] · [HORA]', null, '#141313', null, null, 4),
-  ('Clases personalizadas', 'PRIVADAS', 'Uno a uno o en grupo pequeño, con un plan según tu objetivo: cinturón, competencia o salud.', 'Con cita previa', null, '#e2b266', null, null, 5)
-) as v (name, audience_label, description, time_label, group_slug, color, image_path, image_alt, sort_order)
+  ('Taekwondo niños', 'DESDE LOS 5 AÑOS', 'Llegan del colegio a entrenar coordinación, disciplina y confianza, con técnica real, juego y mucha paciencia.', 'Mié, vie, sáb y dom', 'ninos', null, 'programs/1790725638823.jpg', 'Clase de niños', true, 1),
+  ('Jóvenes y adultos', 'DESDE LOS 15 AÑOS', 'Patadas, técnica, acondicionamiento y combate controlado para quienes quieren exigirse de verdad.', 'Mié, vie, sáb y dom', 'adultos', null, 'programs/1790725638823.jpg', 'Clase de adultos', true, 2),
+  ('Adulto mayor', 'MOVILIDAD Y BIENESTAR', 'Taekwondo con tai chi y chi kung: trabajo articular, equilibrio y respiración, a tu ritmo.', '11:00 – 12:00', 'mayor', null, 'programs/1790725638823.jpg', 'Clase de la mañana', false, 3),
+  ('Clase para todos los niveles', 'TODAS LAS EDADES', 'Niños, jóvenes y adultos entrenan juntos, cada uno a su nivel. Ideal para venir en familia.', '[DÍA] · [HORA]', null, '#141313', null, null, false, 4),
+  ('Clases personalizadas', 'PRIVADAS', 'Uno a uno o en grupo pequeño, con un plan según tu objetivo: cinturón, competencia o salud.', 'Con cita previa', null, '#e2b266', null, null, false, 5)
+) as v (name, audience_label, description, time_label, group_slug, color, image_path, image_alt, is_published, sort_order)
 left join public.class_groups g on g.slug = v.group_slug;
 
+-- A new location is just another row here (plus its images and schedule slots); no code changes.
 insert into public.locations (
-  slug, name, short_name, neighborhood_label, address, reference, phone,
-  whatsapp_message, maps_url, main_image_path, main_image_alt, sort_order
+  slug, name, short_name, neighborhood_label, address, phone,
+  whatsapp_message, maps_url, map_embed_url, main_image_path, main_image_alt, sort_order
 ) values
-  ('salitre', 'Sede Salitre', 'Salitre', 'Salitre · Bogotá', '[DIRECCIÓN SEDE SALITRE]',
-    '[PUNTO DE REFERENCIA, p. ej. cerca de …]', '+57 312 682 4257',
+  ('salitre', 'Sede Salitre', 'Salitre', 'Salitre · Bogotá', 'Cra. 69d #24-15',
+    '+57 316 403 2573',
     'Hola Despertar Sede Salitre, quiero información',
-    'https://www.google.com/maps/search/?api=1&query=Salitre+Bogota',
-    'locations/salitre/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Salitre', 1),
-  ('modelia', 'Sede Modelia', 'Modelia', 'Modelia · Bogotá', '[DIRECCIÓN SEDE MODELIA]',
-    '[PUNTO DE REFERENCIA, p. ej. cerca de …]', '+57 312 682 4257',
-    'Hola Despertar Sede Modelia, quiero información',
-    'https://www.google.com/maps/search/?api=1&query=Modelia+Bogota',
-    'locations/modelia/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Modelia', 2);
+    'https://maps.app.goo.gl/e3NbRUVcv13tTANM7',
+    'https://maps.google.com/maps?q=Academia+Taekwondo+Club+Despertar,+Cra.+69d+%2324-15,+Bogot%C3%A1&z=16&output=embed',
+    'locations/salitre/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Salitre', 1);
 
 -- Only one photo per location in seed-images/: the thumbnails reuse it.
 insert into public.location_images (location_id, path, alt, sort_order)
@@ -144,64 +142,16 @@ cross join (values ('Fachada', 1), ('Clase de niños', 2), ('Clase de adultos', 
 insert into public.schedule_slots (location_id, class_type_id, weekday, start_time, end_time)
 select l.id, c.id, v.weekday, v.start_time::time, v.end_time::time
 from (values
-  ('salitre', 'equilibrio', 1, '11:00', '12:00'),
-  ('salitre', 'movilidad', 2, '11:00', '12:00'),
-  ('salitre', 'respiracion', 3, '11:00', '12:00'),
-  ('salitre', 'memoria', 4, '11:00', '12:00'),
-  ('salitre', 'taichi', 5, '11:00', '12:00'),
-  ('salitre', 'coordinacion', 1, '15:00', '16:00'),
-  ('salitre', 'patadas-ninos', 2, '15:00', '16:00'),
-  ('salitre', 'reaccion', 3, '15:00', '16:00'),
-  ('salitre', 'poomsae-ninos', 4, '15:00', '16:00'),
-  ('salitre', 'flexibilidad-ninos', 5, '15:00', '16:00'),
-  ('salitre', 'valores', 1, '16:00', '17:00'),
-  ('salitre', 'agilidad', 2, '16:00', '17:00'),
-  ('salitre', 'defensa-ninos', 3, '16:00', '17:00'),
-  ('salitre', 'coordinacion', 4, '16:00', '17:00'),
-  ('salitre', 'patadas-ninos', 5, '16:00', '17:00'),
-  ('salitre', 'acondicionamiento', 1, '17:00', '18:30'),
-  ('salitre', 'poomsae', 2, '17:00', '18:30'),
-  ('salitre', 'combate', 3, '17:00', '18:30'),
-  ('salitre', 'patadas-avanzadas', 4, '17:00', '18:30'),
-  ('salitre', 'hosinsul', 5, '17:00', '18:30'),
-  ('salitre', 'combate', 1, '18:30', '20:00'),
-  ('salitre', 'acondicionamiento', 2, '18:30', '20:00'),
-  ('salitre', 'poomsae', 3, '18:30', '20:00'),
-  ('salitre', 'flexibilidad-potencia', 4, '18:30', '20:00'),
-  ('salitre', 'combate', 5, '18:30', '20:00'),
-  ('salitre', 'poomsae-ninos', 6, '07:00', '08:30'),
-  ('salitre', 'reaccion', 7, '07:00', '08:30'),
-  ('salitre', 'kyukpa', 6, '08:30', '10:30'),
-  ('salitre', 'combate', 7, '08:30', '10:30'),
-  ('modelia', 'movilidad', 1, '11:00', '12:00'),
-  ('modelia', 'taichi', 2, '11:00', '12:00'),
-  ('modelia', 'equilibrio', 3, '11:00', '12:00'),
-  ('modelia', 'respiracion', 4, '11:00', '12:00'),
-  ('modelia', 'memoria', 5, '11:00', '12:00'),
-  ('modelia', 'reaccion', 1, '15:00', '16:00'),
-  ('modelia', 'coordinacion', 2, '15:00', '16:00'),
-  ('modelia', 'flexibilidad-ninos', 3, '15:00', '16:00'),
-  ('modelia', 'patadas-ninos', 4, '15:00', '16:00'),
-  ('modelia', 'poomsae-ninos', 5, '15:00', '16:00'),
-  ('modelia', 'patadas-ninos', 1, '16:00', '17:00'),
-  ('modelia', 'valores', 2, '16:00', '17:00'),
-  ('modelia', 'coordinacion', 3, '16:00', '17:00'),
-  ('modelia', 'agilidad', 4, '16:00', '17:00'),
-  ('modelia', 'defensa-ninos', 5, '16:00', '17:00'),
-  ('modelia', 'poomsae', 1, '17:00', '18:30'),
-  ('modelia', 'combate', 2, '17:00', '18:30'),
-  ('modelia', 'acondicionamiento', 3, '17:00', '18:30'),
-  ('modelia', 'hosinsul', 4, '17:00', '18:30'),
-  ('modelia', 'patadas-avanzadas', 5, '17:00', '18:30'),
-  ('modelia', 'acondicionamiento', 1, '18:30', '20:00'),
-  ('modelia', 'combate', 2, '18:30', '20:00'),
-  ('modelia', 'flexibilidad-potencia', 3, '18:30', '20:00'),
-  ('modelia', 'poomsae', 4, '18:30', '20:00'),
-  ('modelia', 'combate', 5, '18:30', '20:00'),
-  ('modelia', 'coordinacion', 6, '07:00', '08:30'),
-  ('modelia', 'poomsae-ninos', 7, '07:00', '08:30'),
-  ('modelia', 'combate', 6, '08:30', '10:30'),
-  ('modelia', 'kyukpa', 7, '08:30', '10:30')
+  -- Niños
+  ('salitre', 'patadas-ninos', 3, '17:00', '18:30'),
+  ('salitre', 'poomsae-ninos', 5, '17:00', '18:30'),
+  ('salitre', 'coordinacion', 6, '08:00', '10:00'),
+  ('salitre', 'reaccion', 7, '08:30', '10:30'),
+  -- Adultos (+15 años)
+  ('salitre', 'acondicionamiento', 3, '18:30', '20:00'),
+  ('salitre', 'poomsae', 5, '18:30', '20:00'),
+  ('salitre', 'combate', 6, '08:00', '10:30'),
+  ('salitre', 'patadas-avanzadas', 7, '08:30', '10:30')
 ) as v (location_slug, class_type_slug, weekday, start_time, end_time)
 join public.locations l on l.slug = v.location_slug
 join public.class_types c on c.slug = v.class_type_slug;
@@ -215,7 +165,7 @@ insert into public.testimonials (quote, author_name, author_meta, rating, source
   ('Mi hijo llegaba tímido y hoy saluda a todos con confianza. Los profes tienen muchísima paciencia con los pequeños.',
     '[Nombre] · ejemplo', 'Mamá de alumno · Niños · Salitre', 5, 'manual', 1),
   ('Buscaba algo más exigente que el gimnasio. Salgo agotado de cada clase y con ganas de volver al día siguiente.',
-    '[Nombre] · ejemplo', 'Jóvenes y adultos · Modelia', 5, 'manual', 2),
+    '[Nombre] · ejemplo', 'Jóvenes y adultos · Salitre', 5, 'manual', 2),
   ('Recuperé movilidad en rodillas y hombros. Las clases de la mañana me devolvieron la energía.',
     '[Nombre] · ejemplo', 'Adulto mayor · Salitre', 5, 'manual', 3);
 
@@ -227,9 +177,7 @@ insert into public.faqs (question, answer, sort_order) values
   ('¿Cuánto cuesta la mensualidad?',
     'Escríbenos por WhatsApp y te enviamos los planes según la clase y la sede que elijas.', 3),
   ('Mi hijo tiene 13 años, ¿con qué grupo entrena?',
-    'Con el que se sienta mejor. Algunos adolescentes prefieren el grupo de niños y otros el de jóvenes y adultos; lo definimos juntos en la clase de prueba.', 4),
-  ('¿Puedo entrenar en las dos sedes?',
-    '[RESPUESTA: indica si el plan permite asistir a Salitre y Modelia.]', 5);
+    'Con el que se sienta mejor. Algunos adolescentes prefieren el grupo de niños y otros el de jóvenes y adultos; lo definimos juntos en la clase de prueba.', 4);
 
 insert into public.social_links (platform, url, sort_order) values
   ('instagram', 'https://instagram.com/', 1),
