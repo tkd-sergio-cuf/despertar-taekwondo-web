@@ -21,13 +21,13 @@ export function LocationTabs({ heading, tabs, panels }: Props) {
 
   return (
     <>
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+      <div className="flex flex-col gap-5 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between lg:gap-x-12 lg:gap-y-6">
         {heading}
         {tabs.length > 1 && (
           <div
             role="tablist"
             aria-label="Sedes"
-            className="flex gap-2 lg:gap-3"
+            className="flex flex-wrap gap-2 lg:gap-3"
           >
             {tabs.map((tab, i) => (
               <button
@@ -38,7 +38,7 @@ export function LocationTabs({ heading, tabs, panels }: Props) {
                 aria-selected={i === active}
                 aria-controls={`panel-${tab.id}`}
                 onClick={() => setActive(i)}
-                className={`flex min-h-14 flex-1 flex-col items-start justify-center gap-0.5 rounded-[12px] px-3.5 text-left text-sm font-bold tracking-[0.04em] uppercase lg:flex-none lg:px-7 lg:text-[15px] ${
+                className={`flex min-h-14 min-w-[30%] flex-1 flex-col items-start justify-center gap-0.5 rounded-[12px] px-3.5 text-left text-sm font-bold tracking-[0.04em] uppercase lg:min-w-0 lg:flex-none lg:px-7 lg:text-[15px] ${
                   i === active
                     ? "bg-accent"
                     : "bg-card shadow-[inset_0_0_0_1.5px_var(--color-line-strong)]"

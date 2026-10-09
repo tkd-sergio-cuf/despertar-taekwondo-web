@@ -40,7 +40,7 @@ insert into public.hero (
 );
 
 insert into public.stats (value, label, description, sort_order) values
-  ('1', 'sede', 'Salitre · Bogotá', 1),
+  ('3', 'sedes', 'En Bogotá', 1),
   ('5', 'años', 'Edad mínima para empezar', 2),
   ('5', 'clases', 'Niños, adultos, mayores, mixta y privada', 3),
   ('$0', 'prueba', 'Tu primera clase es gratis', 4);
@@ -109,7 +109,8 @@ from (values
 ) as v (slug, group_slug, name, description, highlights)
 join public.class_groups g on g.slug = v.group_slug;
 
--- Programs without a schedule yet are kept unpublished.
+-- Adulto mayor and Todos los niveles have no schedule yet and stay unpublished.
+-- Clases personalizadas are by appointment: listed here, never in the schedule.
 insert into public.programs (name, audience_label, description, time_label, group_id, color, image_path, image_alt, is_published, sort_order)
 select v.name, v.audience_label, v.description, v.time_label, g.id, v.color, v.image_path, v.image_alt, v.is_published, v.sort_order
 from (values
@@ -117,27 +118,46 @@ from (values
   ('Jóvenes y adultos', 'DESDE LOS 15 AÑOS', 'Patadas, técnica, acondicionamiento y combate controlado para quienes quieren exigirse de verdad.', 'Mié, vie, sáb y dom', 'adultos', null, 'programs/1790725638823.jpg', 'Clase de adultos', true, 2),
   ('Adulto mayor', 'MOVILIDAD Y BIENESTAR', 'Taekwondo con tai chi y chi kung: trabajo articular, equilibrio y respiración, a tu ritmo.', '11:00 – 12:00', 'mayor', null, 'programs/1790725638823.jpg', 'Clase de la mañana', false, 3),
   ('Clase para todos los niveles', 'TODAS LAS EDADES', 'Niños, jóvenes y adultos entrenan juntos, cada uno a su nivel. Ideal para venir en familia.', '[DÍA] · [HORA]', null, '#141313', null, null, false, 4),
-  ('Clases personalizadas', 'PRIVADAS', 'Uno a uno o en grupo pequeño, con un plan según tu objetivo: cinturón, competencia o salud.', 'Con cita previa', null, '#e2b266', null, null, false, 5)
+  ('Clases personalizadas', 'PRIVADAS', 'Uno a uno o en grupo pequeño, con un plan según tu objetivo: cinturón, competencia o salud.', 'Con cita previa', null, '#e2b266', null, null, true, 5)
 ) as v (name, audience_label, description, time_label, group_slug, color, image_path, image_alt, is_published, sort_order)
 left join public.class_groups g on g.slug = v.group_slug;
 
 -- A new location is just another row here (plus its images and schedule slots); no code changes.
+-- Salitre is the real location. The two "(ejemplo)" ones are made up, only to try
+-- the site with several locations.
 insert into public.locations (
-  slug, name, short_name, neighborhood_label, address, phone,
+  slug, name, short_name, neighborhood_label, address, reference, phone,
   whatsapp_message, maps_url, map_embed_url, main_image_path, main_image_alt, sort_order
 ) values
-  ('salitre', 'Sede Salitre', 'Salitre', 'Salitre · Bogotá', 'Cra. 69d #24-15',
-    '+57 316 403 2573',
+  ('salitre', 'Sede Salitre', 'Salitre', 'Salitre · Bogotá', 'Cra. 69d #24-15, Bogotá, Colombia',
+    'A 5 minutos del centro comercial Salitre Plaza', '+57 316 403 2573',
     'Hola Despertar Sede Salitre, quiero información',
     'https://maps.app.goo.gl/e3NbRUVcv13tTANM7',
     'https://maps.google.com/maps?q=Academia+Taekwondo+Club+Despertar,+Cra.+69d+%2324-15,+Bogot%C3%A1&z=16&output=embed',
-    'locations/salitre/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Salitre', 1);
+    'locations/salitre/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Salitre', 1),
+  ('norte', 'Sede Norte (ejemplo)', 'Norte', 'Usaquén · Bogotá', 'Cl. 119 #6-20, Bogotá, Colombia',
+    'A 5 minutos del parque de Usaquén', '+57 316 403 2573',
+    'Hola Despertar Sede Norte, quiero información',
+    'https://www.google.com/maps/search/?api=1&query=4.6946,-74.0308',
+    'https://maps.google.com/maps?q=4.6946,-74.0308&z=16&output=embed',
+    'locations/salitre/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Norte', 2),
+  ('sur', 'Sede Sur (ejemplo)', 'Sur', 'Kennedy · Bogotá', 'Cra. 78 #38-10 Sur, Bogotá, Colombia',
+    'A 5 minutos del parque Timiza', '+57 316 403 2573',
+    'Hola Despertar Sede Sur, quiero información',
+    'https://www.google.com/maps/search/?api=1&query=4.6268,-74.1530',
+    'https://maps.google.com/maps?q=4.6268,-74.1530&z=16&output=embed',
+    'locations/salitre/Foto nuestra.jpg', 'Salón de entrenamiento de la Sede Sur', 3);
 
--- Only one photo per location in seed-images/: the thumbnails reuse it.
+-- seed-images/ has few photos: every location reuses them so the gallery has several to browse.
 insert into public.location_images (location_id, path, alt, sort_order)
-select l.id, 'locations/' || l.slug || '/Foto nuestra.jpg', v.alt || ' · ' || l.name, v.sort_order
+select l.id, v.path, v.alt || ' · ' || l.name, v.sort_order
 from public.locations l
-cross join (values ('Fachada', 1), ('Clase de niños', 2), ('Clase de adultos', 3)) as v (alt, sort_order);
+cross join (values
+  ('programs/1790725638823.jpg', 'Clase de adultos', 1),
+  ('locations/salitre/Foto nuestra.jpg', 'Grupo de estudiantes', 2),
+  ('programs/1790725638823.jpg', 'Clase de niños', 3),
+  ('locations/salitre/Foto nuestra.jpg', 'Celebración en la sede', 4)
+) as v (path, alt, sort_order);
 
 insert into public.schedule_slots (location_id, class_type_id, weekday, start_time, end_time)
 select l.id, c.id, v.weekday, v.start_time::time, v.end_time::time
@@ -151,7 +171,18 @@ from (values
   ('salitre', 'acondicionamiento', 3, '18:30', '20:00'),
   ('salitre', 'poomsae', 5, '18:30', '20:00'),
   ('salitre', 'combate', 6, '08:00', '10:30'),
-  ('salitre', 'patadas-avanzadas', 7, '08:30', '10:30')
+  ('salitre', 'patadas-avanzadas', 7, '08:30', '10:30'),
+  -- Sede Norte (ejemplo)
+  ('norte', 'coordinacion', 1, '16:00', '17:00'),
+  ('norte', 'agilidad', 4, '16:00', '17:00'),
+  ('norte', 'combate', 1, '18:00', '19:30'),
+  ('norte', 'hosinsul', 4, '18:00', '19:30'),
+  -- Sede Sur (ejemplo)
+  ('sur', 'valores', 2, '15:00', '16:30'),
+  ('sur', 'defensa-ninos', 4, '15:00', '16:30'),
+  ('sur', 'kyukpa', 2, '19:00', '20:30'),
+  ('sur', 'flexibilidad-potencia', 4, '19:00', '20:30'),
+  ('sur', 'combate', 6, '09:00', '11:00')
 ) as v (location_slug, class_type_slug, weekday, start_time, end_time)
 join public.locations l on l.slug = v.location_slug
 join public.class_types c on c.slug = v.class_type_slug;

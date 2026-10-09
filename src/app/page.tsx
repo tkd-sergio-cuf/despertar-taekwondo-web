@@ -110,6 +110,7 @@ export default async function Home() {
           locations={locations}
           schedule={schedule}
           businessName={settings?.business_name}
+          timeZone={settings?.timezone ?? "UTC"}
         />
         <About
           section={sections.nosotros}

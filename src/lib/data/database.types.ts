@@ -221,14 +221,14 @@ isOneToOne: false
                   ]
                 },"site_settings": {
                   Row: {
-                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at": string,"email": string | null,"favicon_path": string,"footer_description": string,"free_class_message": string,"id": string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone": string | null,"seo_description": string,"seo_title": string,"singleton": boolean,"updated_at": string,"whatsapp_number": string
+                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at": string,"email": string | null,"favicon_path": string,"footer_description": string,"free_class_message": string,"id": string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone": string | null,"seo_description": string,"seo_title": string,"singleton": boolean,"timezone": string,"updated_at": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at"?: string,"email"?: string | null,"favicon_path": string,"footer_description": string,"free_class_message": string,"id"?: string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone"?: string | null,"seo_description": string,"seo_title": string,"singleton"?: boolean,"updated_at"?: string,"whatsapp_number": string
+                    "business_name": string,"business_subtitle": string,"city": string,"copyright_text": string,"created_at"?: string,"email"?: string | null,"favicon_path": string,"footer_description": string,"free_class_message": string,"id"?: string,"logo_alt": string,"logo_path": string,"og_image_path": string,"phone"?: string | null,"seo_description": string,"seo_title": string,"singleton"?: boolean,"timezone"?: string,"updated_at"?: string,"whatsapp_number": string
                   }
                   Update: {
-                    "business_name"?: string,"business_subtitle"?: string,"city"?: string,"copyright_text"?: string,"created_at"?: string,"email"?: string | null,"favicon_path"?: string,"footer_description"?: string,"free_class_message"?: string,"id"?: string,"logo_alt"?: string,"logo_path"?: string,"og_image_path"?: string,"phone"?: string | null,"seo_description"?: string,"seo_title"?: string,"singleton"?: boolean,"updated_at"?: string,"whatsapp_number"?: string
+                    "business_name"?: string,"business_subtitle"?: string,"city"?: string,"copyright_text"?: string,"created_at"?: string,"email"?: string | null,"favicon_path"?: string,"footer_description"?: string,"free_class_message"?: string,"id"?: string,"logo_alt"?: string,"logo_path"?: string,"og_image_path"?: string,"phone"?: string | null,"seo_description"?: string,"seo_title"?: string,"singleton"?: boolean,"timezone"?: string,"updated_at"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     

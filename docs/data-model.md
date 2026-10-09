@@ -68,6 +68,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | free_class_message | text | mensaje prellenado de WhatsApp para "Clase gratis" |
 | phone | text, null | "Tel." del footer |
 | email | text, null | correo del footer |
+| timezone | text | zona horaria del negocio (nombre IANA, p. ej. "America/Bogota"); se usa para calcular las próximas clases |
 
 **`hero`** — una sola fila, garantizada por la base de datos (ver sección 4). Sección de inicio.
 
@@ -146,7 +147,7 @@ Inventario de imágenes del diseño y dónde se guarda cada una:
 | is_published | boolean | |
 | sort_order | int | |
 
-**`schedule_slots`** — una fila por clase en la semana de una sede. Alimenta la grilla de Horarios y la lista "Horarios · {sede}" del inicio (esta se obtiene agrupando franjas; no se guarda aparte).
+**`schedule_slots`** — una fila por clase en la semana de una sede. Alimenta la grilla de Horarios y la lista "Próximas clases · {sede}" del inicio (las fechas se calculan a partir del día de la semana y de `site_settings.timezone`; no se guardan).
 
 | Columna | Tipo | Nota |
 |---|---|---|
